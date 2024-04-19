@@ -34,7 +34,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "petclinic"
+    bucket = "remote-state-app"
     key    = "tfstatefiles/terraform.tfstate"
     region = "eu-west-3"
   }
