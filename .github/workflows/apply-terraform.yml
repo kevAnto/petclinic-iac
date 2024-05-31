@@ -50,4 +50,3 @@ jobs:
         id: apply
         run: terraform destroy -auto-approve
 
-#
