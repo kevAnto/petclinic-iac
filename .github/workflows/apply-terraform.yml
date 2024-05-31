@@ -35,7 +35,7 @@ jobs:
       
       - name: Terraform Init
         id: init
-        run: terraform init -upgrade
+        run: terraform init
       
       - name: Terraform Validate
         id: validate
@@ -48,5 +48,5 @@ jobs:
         
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve
+        run: terraform destroy -auto-approve
 
