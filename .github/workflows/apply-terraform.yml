@@ -1,9 +1,20 @@
-name: Apply Terraform 
-run-name: Starting to apply terraform
-on: 
+name: Apply or Destroy Terraform
+run-name: Choose to apply or destroy Terraform infrastructure
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose action to perform"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - apply
+          - destroy
   push:
     branches:
       - "main"
+
 jobs:
   update-infrastructure:
     runs-on: ubuntu-22.04
@@ -14,39 +25,43 @@ jobs:
       TF_VAR_DB_USERNAME:  ${{ secrets.DB_USERNAME }}
       TF_VAR_DB_PASSWORD:  ${{ secrets.DB_PASSWORD }}
       TF_VAR_GRAFANA_PASSWORD:  ${{ secrets.GRAFANA_PASSWORD }}
-    
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-        # check https://github.com/marketplace/actions/hashicorp-setup-terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.5"
           terraform_wrapper: false
-      
+
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
-      
+
       - name: Terraform Init
         id: init
         run: terraform init
-      
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-      
+
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color  -detailed-exitcode
+        run: terraform plan -no-color -detailed-exitcode
         continue-on-error: true
-        
-      - name: Terraform destroy
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        id: apply
+        run: terraform apply -auto-approve
+
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
         id: destroy
         run: terraform destroy -auto-approve
-
